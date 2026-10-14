@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+.mutmut-cache/
+*.py[cod]
+trace.jsonl
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
