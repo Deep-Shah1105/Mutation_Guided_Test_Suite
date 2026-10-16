@@ -1,12 +1,32 @@
 from __future__ import annotations
+import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from core.service import run_generation
 
 load_dotenv()
 app = FastAPI(title="Mutation-Guided Test Suite Generator", version="0.1.0",
               description="Multi-agent pytest test generation with mutation-guided refinement.")
+
+# Set FRONTEND_ORIGINS to a comma-separated list of trusted frontend origins when deployed.
+# Local defaults support VS Code Live Server and common local development ports.
+_allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:3000,http://localhost:3000",
+    ).split(",")
+    if origin.strip()
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+)
 
 
 class GenerateRequest(BaseModel):
