@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["source_code"],
+  "properties": {
+    "source_code": {"type": "string"},
+    "function_name": {"type": ["string", "null"]}
+  }
+}
