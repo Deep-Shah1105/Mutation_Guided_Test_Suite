@@ -1,9 +1,13 @@
 {
   "type": "object",
-  "required": ["run_id", "generated_tests"],
+  "required": ["run_id", "generated_tests", "pytest_result", "mutation_result", "report", "trace_path"],
   "properties": {
     "run_id": {"type": "string"},
     "function_name": {"type": ["string", "null"]},
-    "generated_tests": {"type": "string"}
+    "generated_tests": {"type": "string"},
+    "pytest_result": {"type": "object"},
+    "mutation_result": {"type": "object"},
+    "report": {"type": "object"},
+    "trace_path": {"type": "string"}
   }
 }
