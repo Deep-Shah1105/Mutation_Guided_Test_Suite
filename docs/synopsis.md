@@ -1,3 +1,7 @@
 # Synopsis
 
 The Mutation-Guided Test Suite Generator is a multi-agent system that produces pytest unit tests for a supplied Python function and evaluates those tests by deliberately introducing program mutations. Instead of treating generated tests as successful merely because they run, the system checks whether they detect altered behavior. Surviving mutants are examined by a Mutation Analyst and, when classified as genuine test gaps, are returned to an Adversary agent so the next test-writing round targets the missed behavior.
+
+The system is implemented in Python using LangGraph for shared-state orchestration, the Anthropic API for agent decisions, Python's AST module for source inspection, pytest for test execution, mutmut for mutation testing, and FastAPI for a deployable HTTP endpoint. A typed shared blackboard carries source analysis, edge cases, generated tests, test outcomes, critic feedback, mutation results, and the final report. The Supervisor chooses between legal next actions rather than relying on a fixed workflow, while a JSONL logger records actual routing and agent events for review.
+
+The intended outcome is a demonstrable test-generation loop that improves test quality using mutation evidence and makes its decisions inspectable. Remaining engineering priorities are robust mutation-result parsing, adversarial-input sandboxing, deployment validation, and collection of a genuine trace from the deployed system. Offline heuristic fallbacks are labelled as such and must not be presented as equivalent to the LLM-driven demo.
