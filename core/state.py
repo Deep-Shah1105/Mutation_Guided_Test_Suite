@@ -14,6 +14,7 @@ class GeneratorState(TypedDict, total=False):
     edge_cases: list[dict[str, Any]]
     generated_tests: str
     pytest_result: dict[str, Any]
+    coverage_result: dict[str, Any]
     critic_review: dict[str, Any]
     mutation_result: dict[str, Any]
     mutation_analysis: dict[str, Any]
