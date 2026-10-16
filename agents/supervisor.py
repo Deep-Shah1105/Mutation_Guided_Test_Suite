@@ -25,7 +25,12 @@ def legal_actions(state: dict) -> list[str]:
             return ["run_mutations", "reporter"] if int(state.get("mutation_attempts", 0)) < 2 else ["reporter"]
         if not state.get("mutation_analysis"):
             return ["mutation_analyst"]
-        gaps = state.get("mutation_analysis", {}).get("genuine_gaps", [])
+        analysis_result = state.get("mutation_analysis", {})
+        gaps = analysis_result.get("genuine_gaps", [])
+        coverage_gaps = analysis_result.get("coverage_gaps", [])
+        if coverage_gaps and int(state.get("round_index", 0)) < max_rounds and not state.get("needs_regeneration"):
+            # Coverage gaps trigger a targeted refinement pass instead of allowing an early stop.
+            return ["adversary"]
         if gaps and int(state.get("round_index", 0)) < max_rounds and not state.get("needs_regeneration"):
             return ["adversary", "reporter"]
         if state.get("needs_regeneration"):
@@ -46,7 +51,7 @@ def _offline_choice(state: dict, actions: list[str]) -> tuple[str, str]:
     preference = ["code_analyst", "adversary", "test_writer", "test_critic", "run_mutations",
                   "mutation_analyst", "reporter"]
     choice = next((name for name in preference if name in actions), actions[0])
-    return choice, "Offline fallback selected the first safe action in its priority order; configure OPENAI_API_KEY for agentic routing."
+    return choice, "Offline fallback selected the first safe action in its priority order; configure GEMINI_API_KEY for agentic routing."
 
 
 def supervisor(state: dict) -> dict:
@@ -67,6 +72,7 @@ Current state summary: { {
   'mutations': (state.get('mutation_result') or {}).get('status'),
   'survivors': (state.get('mutation_result') or {}).get('survived', []),
   'mutation_analysis': state.get('mutation_analysis', {}),
+  'coverage': (state.get('pytest_result') or {}).get('coverage', {}),
   'round': state.get('round_index', 0), 'max_rounds': state.get('max_rounds', 3),
   'errors': state.get('errors', [])[-3:],
 } }
