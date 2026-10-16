@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["run_id", "generated_tests"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "function_name": {"type": ["string", "null"]},
+    "generated_tests": {"type": "string"}
+  }
+}
