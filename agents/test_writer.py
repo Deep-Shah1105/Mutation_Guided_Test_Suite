@@ -33,7 +33,10 @@ User notes: {state.get('request_notes', '')}
 Analysis: {state.get('analysis', {})}
 Edge cases: {state.get('edge_cases', [])}
 Surviving mutants and analysis: {(state.get('mutation_result') or {}).get('survived', [])} / {state.get('mutation_analysis', {})}
+Measured coverage from previous run: {(state.get('pytest_result') or {}).get('coverage', {})}
+Coverage feedback: {(state.get('mutation_analysis') or {}).get('coverage_gaps', [])}
 Critic feedback: {prior_feedback}
+When revising, add targeted tests for uncovered lines/branches and surviving mutants; do not merely duplicate existing cases.
 Prior test code (revise it if present):
 ```python
 {test_code}
@@ -59,7 +62,7 @@ Function source:
         if "from candidate import" not in test_code and "import candidate" not in test_code:
             test_code = f"import candidate\n\n" + test_code
         timeout = int(os.getenv("AGENT_TIMEOUT_SECONDS", "15"))
-        test_result = run_pytest(state["source_code"], test_code, timeout_seconds=timeout)
+        test_result = run_pytest(state["source_code"], test_code, timeout_seconds=timeout, collect_coverage=True)
         repair_log.append({"attempt": attempt + 1, "status": test_result["status"]})
         if test_result["passed"] or attempt == max_repairs:
             break
@@ -68,6 +71,7 @@ Function source:
     updates = {
         "generated_tests": test_code,
         "pytest_result": test_result,
+        "coverage_result": test_result.get("coverage", {}),
         "critic_review": {},
         "mutation_result": {},
         "mutation_analysis": {},
