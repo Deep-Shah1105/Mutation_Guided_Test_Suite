@@ -21,6 +21,9 @@ Tests:
 {tests}
 ```
 Pytest result: {(state.get('pytest_result') or {}).get('status')}
+Measured line/branch coverage: {(state.get('pytest_result') or {}).get('coverage', {})}
+Surviving mutants: {(state.get('mutation_result') or {}).get('survived', [])}
+Request specific revision instructions for important uncovered lines/branches, not generic advice.
 Edge cases: {state.get('edge_cases', [])}
 """
     review = ask_json("You are the Test Critic agent. Be skeptical and request specific revisions.", prompt)
@@ -29,7 +32,7 @@ Edge cases: {state.get('edge_cases', [])}
         return {**error_update(state, "test_critic", review["_llm_error"]),
                 **traced(state, "test_critic", "critic_fallback", {"reason": "LLM request failed"},
                          {"critic_review": {"approved": False, "score": 0, "weaknesses": ["Could not contact LLM critic"],
-                                             "revision_instructions": ["Configure OPENAI_API_KEY and request a real review."],
+                                             "revision_instructions": ["Configure GEMINI_API_KEY and request a real review."],
                                              "rationale": "Fail closed when the critic is unavailable."}})}
     if review is None:
         weak = [pattern for pattern in WEAK_PATTERNS if re.search(pattern, tests)]
@@ -37,7 +40,7 @@ Edge cases: {state.get('edge_cases', [])}
         review = {"approved": bool(has_assert and not weak and (state.get("pytest_result") or {}).get("passed")),
                   "score": 2 if weak else (5 if has_assert else 0),
                   "weaknesses": [f"Weak assertion pattern detected: {p}" for p in weak] or ["Offline fallback cannot judge semantic strength."],
-                  "revision_instructions": ["Configure OPENAI_API_KEY for a semantic critic review."] if weak or not has_assert else [],
+                  "revision_instructions": ["Configure GEMINI_API_KEY for a semantic critic review."] if weak or not has_assert else [],
                   "rationale": "Heuristic offline review only; not equivalent to an LLM critic."}
     approved = bool(review.get("approved", False)) and bool((state.get("pytest_result") or {}).get("passed"))
     review["approved"] = approved
