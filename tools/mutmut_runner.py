@@ -147,7 +147,7 @@ def run_mutmut(source_code: str, test_code: str, timeout_seconds: int = 45,
         tests_dir.mkdir()
         (tests_dir / "test_candidate.py").write_text(test_code, encoding="utf-8")
         (root / "pyproject.toml").write_text(
-            '[tool.mutmut]\npaths_to_mutate = "candidate.py"\ntests_dir = "tests/"\n', encoding="utf-8"
+            '[tool.mutmut]\nsource_paths = ["candidate.py"]\npytest_add_cli_args_test_selection = ["tests/"]\n', encoding="utf-8"
         )
         env = {"PATH": os.environ.get("PATH", ""), "HOME": str(root),
                "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1",
@@ -167,9 +167,13 @@ def run_mutmut(source_code: str, test_code: str, timeout_seconds: int = 45,
                 results_text = (result_proc.stdout + "\n" + result_proc.stderr).strip()[-12000:]
                 survivors = [line.strip() for line in results_text.splitlines()
                              if line.strip() and ("candidate.py" in line or "candidate." in line)]
-                summary = re.search(r"(?:killed|killed mutants?)\D+(\d+).*?(?:total|mutants?)\D+(\d+)",
-                                    run_output, flags=re.I | re.S)
-                killed, total = (int(summary.group(1)), int(summary.group(2))) if summary else (None, None)
+                # mutmut 3 prints progress such as "6/6  <party> 3 ... <frown> 3"; read the last progress line.
+                progress = re.findall(r"(\d+)/(\d+)\s+\U0001F389\s*(\d+)", run_output.replace("\r", "\n"))
+                if progress:
+                    _, total_text, killed_text = progress[-1]
+                    killed, total = int(killed_text), int(total_text)
+                else:
+                    killed, total = None, None
                 return {"status": "completed", "engine": "mutmut", "evaluation_scope": "mutmut",
                         "full_mutation_score_available": bool(total), "evaluation_complete": True,
                         "total": total, "killed": killed, "survived": survivors,

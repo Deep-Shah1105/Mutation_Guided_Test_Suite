@@ -24,6 +24,7 @@
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[char]));
   const pretty = (value) => JSON.stringify(value ?? {}, null, 2);
   const baseUrl = () => $("apiBase").value.trim().replace(/\/+$/, "");
+  if (location.protocol.startsWith("http") && location.port !== "5500") { $("apiBase").value = location.origin; }
 
   function setStatus(kind, text) {
     const el = $("runStatus");

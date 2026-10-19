@@ -2,7 +2,9 @@ from __future__ import annotations
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from core.service import run_generation
 
@@ -67,3 +69,10 @@ def generate(request: GenerateRequest) -> GenerateResponse:
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Generation failed: {type(exc).__name__}: {exc}") from exc
+
+
+# Serve the web UI from the same service so one public URL works on any device.
+# Mounted last so /health, /generate and /docs keep priority.
+_frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+if _frontend_dir.is_dir():
+    app.mount("/", StaticFiles(directory=_frontend_dir, html=True), name="frontend")
