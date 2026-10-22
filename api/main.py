@@ -46,6 +46,7 @@ class GenerateResponse(BaseModel):
     mutation_result: dict = Field(default_factory=dict)
     report: dict = Field(default_factory=dict)
     trace_path: str = "trace.jsonl"
+    trace_events: list[dict] = Field(default_factory=list)
 
 
 @app.get("/health")
