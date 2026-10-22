@@ -7,6 +7,7 @@
   <meta name="description" content="Generate and refine pytest suites using mutation testing and a multi-agent workflow.">
   <title>Mutation Lab — Test Suite Generator</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="trace.css">
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -80,7 +81,22 @@
           <div class="empty-list"><span><i>01</i> Generated pytest module</span><span><i>02</i> Baseline test execution</span><span><i>03</i> Mutation analysis and recommendations</span></div>
         </div>
         <div id="resultContent" hidden>
-          <div class="result-intro"><div><div id="resultFunction" class="result-function">Function run</div><div id="resultRunId" class="result-runid">Run ID —</div></div><button id="downloadTests" type="button" class="download-button" disabled><span aria-hidden="true">↓</span> Download tests.py</button></div>
+          <div class="result-intro">
+  <div>
+    <div id="resultFunction" class="result-function">Function run</div>
+    <div id="resultRunId" class="result-runid">Run ID —</div>
+  </div>
+
+  <div class="result-actions">
+    <button id="viewTrace" type="button" class="trace-button">
+      <span aria-hidden="true">⌁</span> View trace
+    </button>
+
+    <button id="downloadTests" type="button" class="download-button" disabled>
+      <span aria-hidden="true">↓</span> Download tests.py
+    </button>
+  </div>
+</div>
           <div class="metric-grid">
             <div class="metric-card"><span class="metric-label">PYTEST STATUS</span><strong id="pytestMetric" class="metric-value">—</strong><small id="pytestSub">Baseline execution</small></div>
             <div class="metric-card accent-card"><span class="metric-label">MUTATION SCORE</span><strong id="mutationMetric" class="metric-value">—</strong><small id="mutationSub">Mutants killed</small></div>
@@ -98,6 +114,45 @@
     </section>
     <footer class="page-footer"><span>Mutation Lab <span class="footer-dot">•</span> Multi-agent QA research prototype</span><span>Built around Python · pytest · mutation testing</span></footer>
   </main>
+  <dialog id="traceDialog" class="trace-dialog"
+        aria-labelledby="traceDialogTitle">
+
+  <div class="trace-dialog-header">
+    <div>
+      <div class="section-kicker">RUN INSPECTOR</div>
+      <h2 id="traceDialogTitle">Execution trace</h2>
+      <p id="traceDescription">Agent events recorded for this run.</p>
+    </div>
+
+    <button id="closeTrace" class="trace-close"
+            type="button" aria-label="Close trace">×</button>
+  </div>
+
+  <div class="trace-toolbar">
+    <span id="traceCount" class="mini-status">0 events</span>
+
+    <div class="trace-toolbar-actions">
+      <button id="copyTrace" type="button"
+              class="secondary-button" disabled>
+        Copy trace
+      </button>
+
+      <button id="downloadTrace" type="button"
+              class="download-button" disabled>
+        Download .jsonl
+      </button>
+    </div>
+  </div>
+
+  <pre id="traceOutput" class="trace-output" aria-live="polite">Trace events will appear here.</pre>
+
+  <div class="trace-dialog-footer">
+    <span>One JSON record per line · current run only</span>
+    <button id="closeTraceFooter" type="button"
+            class="secondary-button">Close</button>
+  </div>
+
+</dialog>
   <script src="app.js"></script>
 </body>
 </html>
