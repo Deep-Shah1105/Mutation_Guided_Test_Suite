@@ -67,6 +67,7 @@ def generate(request: GenerateRequest) -> GenerateResponse:
             mutation_result=result.get("mutation_result", {}),
             report=result.get("report", {}),
             trace_path=result.get("trace_path", "trace.jsonl"),
+            trace_events=result.get("trace_events", []),
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Generation failed: {type(exc).__name__}: {exc}") from exc
