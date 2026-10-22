@@ -12,7 +12,14 @@
         return upper
     return value
 `;
-  const state = { tests: "", result: null, loadingTimer: null, loadingStep: 0, abortController: null };
+  const state = {
+  tests: "",
+  result: null,
+  traceEvents: [],
+  loadingTimer: null,
+  loadingStep: 0,
+  abortController: null
+};
   const loadingSteps = [
     ["Agents are analyzing your function", "Inspecting branches, parameters, and likely edge cases…"],
     ["Building an adversarial test plan", "Choosing boundary values and behaviors worth challenging…"],
@@ -110,6 +117,9 @@
   function renderResults(data) {
     state.result = data;
     state.tests = data.generated_tests || "";
+    state.traceEvents = Array.isArray(data.trace_events)
+  ? data.trace_events
+  : [];
     const pytest = data.pytest_result || {};
     const mutation = data.mutation_result || {};
     const report = data.report || {};
@@ -258,6 +268,103 @@
       stopLoading();
     }
   }
+  function traceAsJsonl() {
+  return state.traceEvents
+    .map((entry) => JSON.stringify(entry))
+    .join("\n");
+}
+
+function openTrace() {
+  const raw = traceAsJsonl();
+  const runId = state.result?.run_id || "unknown";
+
+  $("traceDescription").textContent =
+    `Run ${runId} · ${state.traceEvents.length} recorded event(s)`;
+
+  $("traceCount").textContent =
+    `${state.traceEvents.length} event${state.traceEvents.length === 1 ? "" : "s"}`;
+
+  $("traceOutput").textContent = raw ||
+    "No trace events were returned. Make sure the updated backend has been deployed.";
+
+  $("copyTrace").disabled = !raw;
+  $("downloadTrace").disabled = !raw;
+
+  const dialog = $("traceDialog");
+
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+  } else {
+    dialog.setAttribute("open", "open");
+  }
+}
+
+function closeTrace() {
+  const dialog = $("traceDialog");
+
+  if (typeof dialog.close === "function" && dialog.open) {
+    dialog.close();
+  } else {
+    dialog.removeAttribute("open");
+  }
+}
+
+async function copyTrace() {
+  const raw = traceAsJsonl();
+  if (!raw) return;
+
+  const button = $("copyTrace");
+
+  try {
+    await navigator.clipboard.writeText(raw);
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = raw;
+    document.body.append(area);
+    area.select();
+
+    const copied = document.execCommand("copy");
+    area.remove();
+
+    if (!copied) {
+      button.textContent = "Copy unavailable";
+      window.setTimeout(() => {
+        button.textContent = "Copy trace";
+      }, 1800);
+      return;
+    }
+  }
+
+  button.textContent = "Copied!";
+  window.setTimeout(() => {
+    button.textContent = "Copy trace";
+  }, 1800);
+}
+
+function downloadTrace() {
+  const raw = traceAsJsonl();
+  if (!raw) return;
+
+  const runId = String(state.result?.run_id || "run")
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
+
+  const blob = new Blob(
+    [`${raw}\n`],
+    { type: "application/x-ndjson;charset=utf-8" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = `trace-${runId}.jsonl`;
+
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
   function downloadTests() {
     if (!state.tests) return;
     const blob = new Blob([state.tests.endsWith("\n") ? state.tests : `${state.tests}\n`], { type: "text/x-python;charset=utf-8" });
@@ -293,6 +400,19 @@
   $("checkConnection").addEventListener("click", checkConnection);
   $("downloadTests").addEventListener("click", downloadTests);
   $("copyTests").addEventListener("click", copyTests);
+  $("viewTrace").addEventListener("click", openTrace);
+
+$("closeTrace").addEventListener("click", closeTrace);
+$("closeTraceFooter").addEventListener("click", closeTrace);
+
+$("copyTrace").addEventListener("click", copyTrace);
+$("downloadTrace").addEventListener("click", downloadTrace);
+
+$("traceDialog").addEventListener("click", (event) => {
+  if (event.target === $("traceDialog")) {
+    closeTrace();
+  }
+});
   document.querySelectorAll(".result-tab").forEach((button) => button.addEventListener("click", () => switchTab(button.dataset.tab)));
   $("sourceCode").value = "";
   updateCharCount();
