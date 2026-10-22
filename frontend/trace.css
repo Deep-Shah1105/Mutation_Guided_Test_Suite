@@ -1,0 +1,191 @@
+/* Execution trace popup and controls */
+
+.result-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.trace-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(167, 243, 208, 0.27);
+  border-radius: 7px;
+  background: rgba(167, 243, 208, 0.07);
+  color: var(--mint);
+  font: 600 11px var(--sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.trace-button:hover {
+  background: rgba(167, 243, 208, 0.13);
+  border-color: rgba(167, 243, 208, 0.5);
+}
+
+.trace-dialog {
+  width: min(980px, calc(100vw - 28px));
+  max-width: none;
+  max-height: min(84vh, 900px);
+  padding: 22px;
+  border: 1px solid rgba(167, 243, 208, 0.22);
+  border-radius: 15px;
+  background: #16212a;
+  color: var(--text);
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.55);
+}
+
+.trace-dialog::backdrop {
+  background: rgba(3, 9, 13, 0.76);
+  backdrop-filter: blur(5px);
+}
+
+.trace-dialog[open] {
+  animation: trace-dialog-in 0.15s ease-out;
+}
+
+.trace-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.trace-dialog-header h2 {
+  margin: 3px 0 4px;
+  font: 700 22px var(--display);
+  letter-spacing: -0.4px;
+}
+
+.trace-dialog-header p {
+  margin: 0;
+  color: #91a6ad;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.trace-close {
+  width: 33px;
+  height: 33px;
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #c2d1d4;
+  font: 24px/1 var(--sans);
+  cursor: pointer;
+}
+
+.trace-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+}
+
+.trace-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.trace-toolbar .download-button {
+  cursor: pointer;
+}
+
+.trace-toolbar .download-button:disabled,
+.trace-toolbar .secondary-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.trace-output {
+  max-height: calc(84vh - 210px);
+  min-height: 240px;
+  overflow: auto;
+  white-space: pre;
+  overflow-wrap: normal;
+  margin: 0;
+  padding: 15px;
+  border: 1px solid rgba(190, 214, 221, 0.11);
+  border-radius: 9px;
+  background: #0c151b;
+  color: #c9e0df;
+  font: 11px/1.7 var(--mono);
+  tab-size: 2;
+}
+
+.trace-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 13px;
+  color: #748b93;
+  font-size: 10px;
+}
+
+.trace-dialog .secondary-button {
+  min-height: 32px;
+}
+
+@keyframes trace-dialog-in {
+  from {
+    opacity: 0.4;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .result-actions {
+    gap: 6px;
+  }
+
+  .result-actions .trace-button,
+  .result-actions .download-button {
+    padding: 7px 8px;
+    font-size: 9px;
+  }
+
+  .trace-dialog {
+    padding: 14px;
+  }
+
+  .trace-dialog-header h2 {
+    font-size: 19px;
+  }
+
+  .trace-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .trace-toolbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .trace-output {
+    min-height: 200px;
+    font-size: 10px;
+  }
+
+  .trace-dialog-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
